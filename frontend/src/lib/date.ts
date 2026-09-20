@@ -39,9 +39,12 @@ export function toISO(date: Date): string {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-/** Месяц и год в виде «сентябрь 2026». */
+/** Месяц и год в виде «Сентябрь 2026». */
 export function formatMonth(date: Date): string {
-  return date.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })
+  // toLocaleDateString с year: 'numeric' добавляет «г.», а CSS-капитализация
+  // поднимает регистр и у сокращения, поэтому собираем строку вручную
+  const name = date.toLocaleDateString('ru-RU', { month: 'long' })
+  return `${name.charAt(0).toUpperCase()}${name.slice(1)} ${date.getFullYear()}`
 }
 
 /** Первое число месяца, к которому относится дата. */

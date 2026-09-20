@@ -68,7 +68,7 @@ export default function CalendarPage() {
           <ActionIcon variant="default" size="lg" onClick={() => showMonth(-1)} aria-label="Предыдущий месяц">
             <IconChevronLeft size={18} />
           </ActionIcon>
-          <Text fw={500} w={175} ta="center" tt="capitalize">
+          <Text fw={500} w={160} ta="center">
             {formatMonth(month)}
           </Text>
           <ActionIcon variant="default" size="lg" onClick={() => showMonth(1)} aria-label="Следующий месяц">

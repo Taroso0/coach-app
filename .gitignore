@@ -1,0 +1,29 @@
+# зависимости и сборка
+node_modules/
+dist/
+build/
+.vite/
+
+# окружение и секреты
+.env
+.env.*
+!.env.example
+
+# Python (backend, следующие ЛР)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# логи
+*.log
+npm-debug.log*
+
+# редакторы и ОС
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# служебное
+.claude/

@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Badge,
+  Box,
   Button,
   Card,
   Checkbox,
@@ -15,6 +16,7 @@ import {
 } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { useState } from 'react'
+import EmptyState from '../components/EmptyState'
 import {
   type CalendarSession,
   type Presence,
@@ -76,52 +78,56 @@ export default function CalendarPage() {
       </Group>
 
       <Paper withBorder p="md" mb="lg">
-        <SimpleGrid cols={7} spacing="xs" mb="xs">
-          {WEEKDAYS.map((weekday) => (
-            <Text key={weekday} size="sm" c="dimmed" ta="center">
-              {weekday}
-            </Text>
-          ))}
-        </SimpleGrid>
-
-        <Stack gap="xs">
-          {monthGrid(month).map((week, index) => (
-            <SimpleGrid key={index} cols={7} spacing="xs">
-              {week.map((day, dayIndex) => {
-                if (!day) return <div key={`empty-${dayIndex}`} />
-
-                const iso = toISO(day)
-                const count = sessionsOf(day).length
-                const isSelected = iso === selectedISO
-
-                return (
-                  <UnstyledButton
-                    key={iso}
-                    onClick={() => setSelected(day)}
-                    p="xs"
-                    ta="center"
-                    bg={isSelected ? 'teal.6' : undefined}
-                    c={isSelected ? 'white' : undefined}
-                    style={{
-                      borderRadius: 'var(--mantine-radius-md)',
-                      border:
-                        iso === todayISO
-                          ? '1px solid var(--mantine-color-teal-6)'
-                          : '1px solid var(--mantine-color-default-border)',
-                    }}
-                  >
-                    <Text size="sm" fw={iso === todayISO ? 700 : 400}>
-                      {day.getDate()}
-                    </Text>
-                    <Text size="xs" c={isSelected ? 'white' : 'dimmed'}>
-                      {count > 0 ? `${count} трен.` : '—'}
-                    </Text>
-                  </UnstyledButton>
-                )
-              })}
+        <Box style={{ overflowX: 'auto' }}>
+          <Box miw={480}>
+            <SimpleGrid cols={7} spacing="xs" mb="xs">
+              {WEEKDAYS.map((weekday) => (
+                <Text key={weekday} size="sm" c="dimmed" ta="center">
+                  {weekday}
+                </Text>
+              ))}
             </SimpleGrid>
-          ))}
-        </Stack>
+
+            <Stack gap="xs">
+              {monthGrid(month).map((week, index) => (
+                <SimpleGrid key={index} cols={7} spacing="xs">
+                  {week.map((day, dayIndex) => {
+                    if (!day) return <div key={`empty-${dayIndex}`} />
+
+                    const iso = toISO(day)
+                    const count = sessionsOf(day).length
+                    const isSelected = iso === selectedISO
+
+                    return (
+                      <UnstyledButton
+                        key={iso}
+                        onClick={() => setSelected(day)}
+                        p="xs"
+                        ta="center"
+                        bg={isSelected ? 'teal.6' : undefined}
+                        c={isSelected ? 'white' : undefined}
+                        style={{
+                          borderRadius: 'var(--mantine-radius-md)',
+                          border:
+                            iso === todayISO
+                              ? '1px solid var(--mantine-color-teal-6)'
+                              : '1px solid var(--mantine-color-default-border)',
+                        }}
+                      >
+                        <Text size="sm" fw={iso === todayISO ? 700 : 400}>
+                          {day.getDate()}
+                        </Text>
+                        <Text size="xs" c={isSelected ? 'white' : 'dimmed'}>
+                          {count > 0 ? `${count} трен.` : '—'}
+                        </Text>
+                      </UnstyledButton>
+                    )
+                  })}
+                </SimpleGrid>
+              ))}
+            </Stack>
+          </Box>
+        </Box>
       </Paper>
 
       <Title order={3} size="h4" mb="sm">
@@ -129,9 +135,7 @@ export default function CalendarPage() {
       </Title>
 
       {daySessions.length === 0 ? (
-        <Text c="dimmed" py="md">
-          В этот день тренировок нет
-        </Text>
+        <EmptyState text="В этот день тренировок нет" hint="Выберите другой день в календаре" />
       ) : (
         <Stack gap="sm">
           {daySessions.map((session) => {
@@ -170,7 +174,7 @@ export default function CalendarPage() {
       >
         <Stack gap="sm">
           {editingAthletes.length === 0 ? (
-            <Text c="dimmed">На это занятие никто не записан</Text>
+            <EmptyState text="На это занятие никто не записан" />
           ) : (
             editingAthletes.map((athlete) => (
               <Checkbox

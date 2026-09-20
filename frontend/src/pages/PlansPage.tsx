@@ -1,6 +1,7 @@
 import { ActionIcon, Badge, Button, Card, Group, Paper, Stack, Text, Title } from '@mantine/core'
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import { useState } from 'react'
+import EmptyState from '../components/EmptyState'
 import { KIND_COLORS, KIND_LABELS, getWeekPlan } from '../data/plans'
 import { WEEKDAYS, addDays, formatShort, formatWeekRange, mondayOf } from '../lib/date'
 
@@ -47,50 +48,54 @@ export default function PlansPage() {
         Тренировок на неделе: {total}
       </Text>
 
-      <Stack gap="sm">
-        {WEEKDAYS.map((weekday, index) => {
-          const sessions = plan[index] ?? []
-          const date = addDays(monday, index)
+      {total === 0 ? (
+        <EmptyState text="На эту неделю тренировок не запланировано" hint="Выберите другую неделю" />
+      ) : (
+        <Stack gap="sm">
+          {WEEKDAYS.map((weekday, index) => {
+            const sessions = plan[index] ?? []
+            const date = addDays(monday, index)
 
-          return (
-            <Paper key={weekday} withBorder p="md">
-              <Group justify="space-between" mb={sessions.length > 0 ? 'sm' : 0}>
-                <Text fw={500}>
-                  {weekday}, {formatShort(date)}
-                </Text>
-                {sessions.length === 0 && (
-                  <Text size="sm" c="dimmed">
-                    Выходной
+            return (
+              <Paper key={weekday} withBorder p="md">
+                <Group justify="space-between" mb={sessions.length > 0 ? 'sm' : 0}>
+                  <Text fw={500}>
+                    {weekday}, {formatShort(date)}
                   </Text>
-                )}
-              </Group>
+                  {sessions.length === 0 && (
+                    <Text size="sm" c="dimmed">
+                      Выходной
+                    </Text>
+                  )}
+                </Group>
 
-              <Stack gap="xs">
-                {sessions.map((session) => (
-                  <Card key={session.id} withBorder padding="sm" radius="sm">
-                    <Group justify="space-between" wrap="nowrap">
-                      <Group gap="sm" wrap="nowrap">
-                        <Text fw={500} w={50}>
-                          {session.time}
-                        </Text>
-                        <div>
-                          <Text size="sm">{session.title}</Text>
-                          <Text size="xs" c="dimmed">
-                            {session.group}
+                <Stack gap="xs">
+                  {sessions.map((session) => (
+                    <Card key={session.id} withBorder padding="sm" radius="sm">
+                      <Group justify="space-between" wrap="nowrap">
+                        <Group gap="sm" wrap="nowrap">
+                          <Text fw={500} w={50}>
+                            {session.time}
                           </Text>
-                        </div>
+                          <div>
+                            <Text size="sm">{session.title}</Text>
+                            <Text size="xs" c="dimmed">
+                              {session.group}
+                            </Text>
+                          </div>
+                        </Group>
+                        <Badge color={KIND_COLORS[session.kind]} variant="light">
+                          {KIND_LABELS[session.kind]}
+                        </Badge>
                       </Group>
-                      <Badge color={KIND_COLORS[session.kind]} variant="light">
-                        {KIND_LABELS[session.kind]}
-                      </Badge>
-                    </Group>
-                  </Card>
-                ))}
-              </Stack>
-            </Paper>
-          )
-        })}
-      </Stack>
+                    </Card>
+                  ))}
+                </Stack>
+              </Paper>
+            )
+          })}
+        </Stack>
+      )}
     </>
   )
 }

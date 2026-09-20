@@ -21,15 +21,8 @@ import {
   STATUS_LABELS,
   findAthlete,
 } from '../data/athletes'
+import EmptyState from '../components/EmptyState'
 import { formatFull } from '../lib/date'
-
-function EmptyState({ text }: { text: string }) {
-  return (
-    <Text c="dimmed" ta="center" py="xl">
-      {text}
-    </Text>
-  )
-}
 
 export default function AthletePage() {
   const { id } = useParams()

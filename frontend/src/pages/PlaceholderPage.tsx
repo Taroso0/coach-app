@@ -4,7 +4,10 @@ interface PlaceholderPageProps {
   title: string
 }
 
-// Временная заглушка: экран будет сверстан на следующих шагах ЛР1
+/**
+ * Заглушка для экрана без собственной вёрстки.
+ * Сейчас используется как страница 404 на маршруте «*».
+ */
 export default function PlaceholderPage({ title }: PlaceholderPageProps) {
   return (
     <>

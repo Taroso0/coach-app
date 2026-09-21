@@ -39,6 +39,8 @@ export interface Athlete {
   history: AttendanceRecord[]
 }
 
+// Подписи и цвета вынесены в словари: в данных хранится 'injured', а пользователь
+// видит «Травма». Record по union-типу не даст забыть новый статус
 export const STATUS_LABELS: Record<AthleteStatus, string> = {
   active: 'В строю',
   injured: 'Травма',

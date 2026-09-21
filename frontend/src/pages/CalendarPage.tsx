@@ -29,31 +29,45 @@ import { KIND_COLORS, KIND_LABELS } from '../data/plans'
 import { WEEKDAYS, addMonths, formatFull, formatMonth, monthGrid, startOfMonth, toISO } from '../lib/date'
 
 export default function CalendarPage() {
+  // useState(() => ...) — ленивая инициализация: без стрелки объект даты
+  // создавался бы заново при каждом рендере и тут же выбрасывался
   const [month, setMonth] = useState(() => startOfMonth(new Date()))
   const [selected, setSelected] = useState(() => new Date())
+  // Сохранённые отметки по ключу занятия. Живут до перезагрузки страницы:
+  // постоянное хранение появится вместе с backend
   const [marks, setMarks] = useState<Record<string, Presence>>({})
+  // null означает «модальное окно закрыто» — одно поле хранит и факт
+  // открытости, и то, какое занятие редактируем
   const [editing, setEditing] = useState<CalendarSession | null>(null)
+  // Черновик галочек: правим его, а не marks, чтобы работала кнопка «Отмена»
   const [draft, setDraft] = useState<Presence>({})
 
+  // Сравниваем дни строками: два разных объекта Date не равны через ===,
+  // даже если описывают один и тот же день
   const todayISO = toISO(new Date())
   const selectedISO = toISO(selected)
   const daySessions = sessionsOf(selected)
 
+  /** Отметки занятия: сохранённые, а если их ещё нет — предзаполненные. */
   const presenceOf = (session: CalendarSession): Presence =>
     marks[session.id] ?? defaultPresenceOf(session)
 
   function showMonth(shift: number) {
     const next = addMonths(month, shift)
     setMonth(next)
+    // Выбранный день переносим вместе с месяцем, иначе список занятий внизу
+    // остался бы от предыдущего месяца и противоречил календарю
     setSelected(next)
   }
 
   function openEditor(session: CalendarSession) {
     setEditing(session)
+    // Копия, а не ссылка: иначе галочки правились бы прямо в сохранённых данных
     setDraft({ ...presenceOf(session) })
   }
 
   function saveEditor() {
+    // Новый объект, а не мутация: React сравнивает состояние по ссылке
     if (editing) setMarks({ ...marks, [editing.id]: draft })
     setEditing(null)
   }
@@ -78,6 +92,9 @@ export default function CalendarPage() {
       </Group>
 
       <Paper withBorder p="md" mb="lg">
+        {/* Семь колонок не помещаются в ширину телефона, а перенос дней на
+            несколько строк разрушил бы привычную сетку недели, поэтому
+            сетка сохраняет минимальную ширину и прокручивается по горизонтали */}
         <Box style={{ overflowX: 'auto' }}>
           <Box miw={480}>
             <SimpleGrid cols={7} spacing="xs" mb="xs">
@@ -92,6 +109,8 @@ export default function CalendarPage() {
               {monthGrid(month).map((week, index) => (
                 <SimpleGrid key={index} cols={7} spacing="xs">
                   {week.map((day, dayIndex) => {
+                    // monthGrid возвращает (Date | null)[][]: null — ячейки до
+                    // первого и после последнего числа месяца
                     if (!day) return <div key={`empty-${dayIndex}`} />
 
                     const iso = toISO(day)
@@ -104,6 +123,8 @@ export default function CalendarPage() {
                         onClick={() => setSelected(day)}
                         p="xs"
                         ta="center"
+                        // Три состояния ячейки: выбранный день — заливкой,
+                        // сегодня — рамкой и жирной цифрой, остальные — обычные
                         bg={isSelected ? 'teal.6' : undefined}
                         c={isSelected ? 'white' : undefined}
                         style={{
@@ -181,6 +202,7 @@ export default function CalendarPage() {
                 key={athlete.id}
                 label={athlete.name}
                 description={athlete.group}
+                // ?? false — чтобы поле не стало неконтролируемым при undefined
                 checked={draft[athlete.id] ?? false}
                 onChange={(event) =>
                   setDraft({ ...draft, [athlete.id]: event.currentTarget.checked })

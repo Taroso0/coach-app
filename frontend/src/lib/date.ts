@@ -12,6 +12,7 @@ export function mondayOf(date: Date): Date {
   return result
 }
 
+/** Сдвиг даты на указанное число дней. */
 export function addDays(date: Date, days: number): Date {
   return new Date(date.getTime() + days * DAY_MS)
 }
@@ -32,8 +33,13 @@ export function formatWeekRange(monday: Date): string {
   return `${formatShort(monday)} — ${formatShort(addDays(monday, 6))}`
 }
 
-/** Дата в виде «2026-09-14» — ключ для хранения занятий и отметок. */
+/**
+ * Дата в виде «2026-09-14» — ключ для хранения занятий и отметок.
+ * Собирается из локальных частей даты, а не через toISOString: тот переводит
+ * время в UTC, и при положительном смещении пояса дата уезжала бы на день назад.
+ */
 export function toISO(date: Date): string {
+  // getMonth() возвращает 0-11, padStart даёт «09» вместо «9»
   const month = String(date.getMonth() + 1).padStart(2, '0')
   const day = String(date.getDate()).padStart(2, '0')
   return `${date.getFullYear()}-${month}-${day}`
@@ -63,7 +69,10 @@ export function addMonths(date: Date, months: number): Date {
  */
 export function monthGrid(month: Date): (Date | null)[][] {
   const first = startOfMonth(month)
+  // День 0 следующего месяца — последний день текущего: так длина месяца
+  // считается сама, включая февраль високосного года
   const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate()
+  // Сколько пустых ячеек нужно до первого числа
   const lead = (first.getDay() + 6) % 7
 
   const cells: (Date | null)[] = Array.from({ length: lead }, () => null)

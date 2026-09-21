@@ -6,6 +6,8 @@ import { KIND_COLORS, KIND_LABELS, getWeekPlan } from '../data/plans'
 import { WEEKDAYS, addDays, formatShort, formatWeekRange, mondayOf } from '../lib/date'
 
 export default function PlansPage() {
+  // Всё состояние экрана — смещение недели относительно текущей.
+  // Понедельник и содержимое плана из него вычисляются
   const [offset, setOffset] = useState(0)
 
   const monday = addDays(mondayOf(new Date()), offset * 7)
@@ -25,6 +27,7 @@ export default function PlansPage() {
           >
             <IconChevronLeft size={18} />
           </ActionIcon>
+          {/* Фиксированная ширина, иначе стрелки дёргались бы при смене дат */}
           <Text fw={500} w={130} ta="center">
             {formatWeekRange(monday)}
           </Text>
@@ -36,6 +39,7 @@ export default function PlansPage() {
           >
             <IconChevronRight size={18} />
           </ActionIcon>
+          {/* Сравнение явное: offset && ... отрисовало бы на экране цифру 0 */}
           {offset !== 0 && (
             <Button variant="subtle" size="compact-sm" onClick={() => setOffset(0)}>
               Текущая неделя
@@ -52,6 +56,8 @@ export default function PlansPage() {
         <EmptyState text="На эту неделю тренировок не запланировано" hint="Выберите другую неделю" />
       ) : (
         <Stack gap="sm">
+          {/* Рисуем все семь дней, включая пустые: тренер должен видеть
+              структуру недели целиком, а не только занятые дни */}
           {WEEKDAYS.map((weekday, index) => {
             const sessions = plan[index] ?? []
             const date = addDays(monday, index)

@@ -9,17 +9,22 @@ export default function AthletesPage() {
   const [query, setQuery] = useState('')
   const navigate = useNavigate()
 
+  // Отфильтрованный список не держим в отдельном состоянии: он однозначно
+  // выводится из запроса, а два источника правды пришлось бы синхронизировать
   const visible = ATHLETES.filter((a) => a.name.toLowerCase().includes(query.trim().toLowerCase()))
 
   return (
     <>
       <Group justify="space-between" mb="md">
         <Title order={2}>Спортсмены</Title>
+        {/* Контролируемое поле: значение живёт в состоянии, поэтому список
+            фильтруется на каждое нажатие клавиши */}
         <TextInput
           placeholder="Поиск по имени"
           leftSection={<IconSearch size={16} />}
           value={query}
           onChange={(e) => setQuery(e.currentTarget.value)}
+          // На телефоне поле во всю ширину, на десктопе — фиксированное
           w={{ base: '100%', sm: 280 }}
         />
       </Group>
@@ -27,6 +32,7 @@ export default function AthletesPage() {
       {visible.length === 0 ? (
         <EmptyState text="Спортсмены не найдены" hint="Измените запрос или очистите поиск" />
       ) : (
+        // Уже 560px таблица не сжимается в кашу, а прокручивается по горизонтали
         <Table.ScrollContainer minWidth={560}>
           <Table highlightOnHover verticalSpacing="sm">
             <Table.Thead>
@@ -40,6 +46,8 @@ export default function AthletesPage() {
             </Table.Thead>
             <Table.Tbody>
               {visible.map((a) => (
+                // Кликабельна вся строка, а обернуть <tr> в ссылку нельзя —
+                // HTML не допускает такую вложенность, поэтому переход программный
                 <Table.Tr
                   key={a.id}
                   onClick={() => navigate(`/athletes/${a.id}`)}
@@ -54,6 +62,8 @@ export default function AthletesPage() {
                     </Badge>
                   </Table.Td>
                   <Table.Td w={180}>
+                    {/* Ширина у числа фиксированная, чтобы проценты во всех
+                        строках стояли по одной вертикали */}
                     <Group gap="xs" wrap="nowrap">
                       <Progress value={a.attendance} flex={1} />
                       <Text size="sm" w={40} ta="right">

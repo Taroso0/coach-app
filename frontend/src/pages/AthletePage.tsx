@@ -28,6 +28,8 @@ export default function AthletePage() {
   const { id } = useParams()
   const athlete = findAthlete(id)
 
+  // Ранний возврат стоит после всех хуков, иначе нарушилось бы правило хуков.
+  // После этой проверки TypeScript сужает тип, и ниже athlete уже не undefined
   if (!athlete) {
     return (
       <Stack align="flex-start">
@@ -60,6 +62,8 @@ export default function AthletePage() {
         </Badge>
       </Group>
 
+      {/* defaultValue, а не value с useState: активную вкладку хранит Mantine.
+          Состояние заводим только там, где значение нужно самому приложению */}
       <Tabs defaultValue="info">
         <Tabs.List mb="md">
           <Tabs.Tab value="info">Информация</Tabs.Tab>
@@ -69,6 +73,7 @@ export default function AthletePage() {
         </Tabs.List>
 
         <Tabs.Panel value="info">
+          {/* Одна колонка на телефоне, две на десктопе */}
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
             <Paper withBorder p="md">
               <Text size="sm" c="dimmed">

@@ -33,3 +33,8 @@ class AthleteRead(AthleteBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    attendance_rate: float | None = Field(
+        default=None,
+        description="Доля занятий, на которых спортсмен присутствовал, в процентах; null — отметок ещё нет",
+        examples=[87.5],
+    )

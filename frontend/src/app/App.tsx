@@ -1,10 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import Layout from './components/Layout'
-import AthletePage from './pages/AthletePage'
-import AthletesPage from './pages/AthletesPage'
-import CalendarPage from './pages/CalendarPage'
-import PlaceholderPage from './pages/PlaceholderPage'
-import PlansPage from './pages/PlansPage'
+import AthletePage from '../pages/AthletePage'
+import AthletesPage from '../pages/AthletesPage'
+import CalendarPage from '../pages/CalendarPage'
+import PlaceholderPage from '../pages/PlaceholderPage'
+import PlansPage from '../pages/PlansPage'
+import Layout from './Layout'
 
 export default function App() {
   return (

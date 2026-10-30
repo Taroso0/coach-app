@@ -14,15 +14,10 @@ import {
 } from '@mantine/core'
 import { IconArrowLeft } from '@tabler/icons-react'
 import { Link, useParams } from 'react-router-dom'
-import {
-  INJURY_STATUS_COLORS,
-  INJURY_STATUS_LABELS,
-  STATUS_COLORS,
-  STATUS_LABELS,
-  findAthlete,
-} from '../data/athletes'
-import EmptyState from '../components/EmptyState'
-import { formatFull } from '../lib/date'
+import AthleteStatusBadge from '../entities/athlete/AthleteStatusBadge'
+import { INJURY_STATUS_COLORS, INJURY_STATUS_LABELS, findAthlete } from '../entities/athlete/model'
+import { formatFull } from '../shared/lib/date'
+import EmptyState from '../shared/ui/EmptyState'
 
 export default function AthletePage() {
   const { id } = useParams()
@@ -57,9 +52,7 @@ export default function AthletePage() {
 
       <Group justify="space-between" align="center" mb="lg">
         <Title order={2}>{athlete.name}</Title>
-        <Badge color={STATUS_COLORS[athlete.status]} variant="light" size="lg">
-          {STATUS_LABELS[athlete.status]}
-        </Badge>
+        <AthleteStatusBadge status={athlete.status} size="lg" />
       </Group>
 
       {/* defaultValue, а не value с useState: активную вкладку хранит Mantine.

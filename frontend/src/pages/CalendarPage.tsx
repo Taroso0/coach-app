@@ -1,32 +1,17 @@
-import {
-  ActionIcon,
-  Badge,
-  Box,
-  Button,
-  Card,
-  Checkbox,
-  Group,
-  Modal,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-  UnstyledButton,
-} from '@mantine/core'
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+import { Box, Button, Card, Group, Paper, SimpleGrid, Stack, Text, Title, UnstyledButton } from '@mantine/core'
 import { useState } from 'react'
-import EmptyState from '../components/EmptyState'
+import SessionKindBadge from '../entities/session/SessionKindBadge'
+import { type CalendarSession, sessionsOf } from '../entities/session/model'
+import MarkAttendanceModal from '../features/mark-attendance/MarkAttendanceModal'
 import {
-  type CalendarSession,
   type Presence,
   defaultPresenceOf,
   presentCount,
   sessionAthletes,
-  sessionsOf,
-} from '../data/calendar'
-import { KIND_COLORS, KIND_LABELS } from '../data/plans'
-import { WEEKDAYS, addMonths, formatFull, formatMonth, monthGrid, startOfMonth, toISO } from '../lib/date'
+} from '../features/mark-attendance/model'
+import { WEEKDAYS, addMonths, formatFull, formatMonth, monthGrid, startOfMonth, toISO } from '../shared/lib/date'
+import EmptyState from '../shared/ui/EmptyState'
+import PeriodSwitcher from '../shared/ui/PeriodSwitcher'
 
 export default function CalendarPage() {
   // useState(() => ...) — ленивая инициализация: без стрелки объект даты
@@ -39,8 +24,6 @@ export default function CalendarPage() {
   // null означает «модальное окно закрыто» — одно поле хранит и факт
   // открытости, и то, какое занятие редактируем
   const [editing, setEditing] = useState<CalendarSession | null>(null)
-  // Черновик галочек: правим его, а не marks, чтобы работала кнопка «Отмена»
-  const [draft, setDraft] = useState<Presence>({})
 
   // Сравниваем дни строками: два разных объекта Date не равны через ===,
   // даже если описывают один и тот же день
@@ -60,35 +43,24 @@ export default function CalendarPage() {
     setSelected(next)
   }
 
-  function openEditor(session: CalendarSession) {
-    setEditing(session)
-    // Копия, а не ссылка: иначе галочки правились бы прямо в сохранённых данных
-    setDraft({ ...presenceOf(session) })
-  }
-
-  function saveEditor() {
+  function saveMarks(presence: Presence) {
     // Новый объект, а не мутация: React сравнивает состояние по ссылке
-    if (editing) setMarks({ ...marks, [editing.id]: draft })
+    if (editing) setMarks({ ...marks, [editing.id]: presence })
     setEditing(null)
   }
-
-  const editingAthletes = editing ? sessionAthletes(editing) : []
 
   return (
     <>
       <Group justify="space-between" align="center" mb="md" wrap="wrap">
         <Title order={2}>Календарь</Title>
-        <Group gap="xs">
-          <ActionIcon variant="default" size="lg" onClick={() => showMonth(-1)} aria-label="Предыдущий месяц">
-            <IconChevronLeft size={18} />
-          </ActionIcon>
-          <Text fw={500} w={160} ta="center">
-            {formatMonth(month)}
-          </Text>
-          <ActionIcon variant="default" size="lg" onClick={() => showMonth(1)} aria-label="Следующий месяц">
-            <IconChevronRight size={18} />
-          </ActionIcon>
-        </Group>
+        <PeriodSwitcher
+          label={formatMonth(month)}
+          labelWidth={160}
+          prevLabel="Предыдущий месяц"
+          nextLabel="Следующий месяц"
+          onPrev={() => showMonth(-1)}
+          onNext={() => showMonth(1)}
+        />
       </Group>
 
       <Paper withBorder p="md" mb="lg">
@@ -170,15 +142,13 @@ export default function CalendarPage() {
                     <Group gap="sm" mb={4}>
                       <Text fw={500}>{session.time}</Text>
                       <Text>{session.title}</Text>
-                      <Badge color={KIND_COLORS[session.kind]} variant="light">
-                        {KIND_LABELS[session.kind]}
-                      </Badge>
+                      <SessionKindBadge kind={session.kind} />
                     </Group>
                     <Text size="sm" c="dimmed">
                       {session.group} · присутствовали {presentCount(presence)} из {total}
                     </Text>
                   </div>
-                  <Button variant="light" onClick={() => openEditor(session)}>
+                  <Button variant="light" onClick={() => setEditing(session)}>
                     Отметить посещения
                   </Button>
                 </Group>
@@ -188,42 +158,13 @@ export default function CalendarPage() {
         </Stack>
       )}
 
-      <Modal
-        opened={editing !== null}
+      <MarkAttendanceModal
+        key={editing?.id}
+        session={editing}
+        initial={editing ? presenceOf(editing) : {}}
         onClose={() => setEditing(null)}
-        title={editing ? `${editing.title} · ${editing.time}` : ''}
-      >
-        <Stack gap="sm">
-          {editingAthletes.length === 0 ? (
-            <EmptyState text="На это занятие никто не записан" />
-          ) : (
-            editingAthletes.map((athlete) => (
-              <Checkbox
-                key={athlete.id}
-                label={athlete.name}
-                description={athlete.group}
-                // ?? false — чтобы поле не стало неконтролируемым при undefined
-                checked={draft[athlete.id] ?? false}
-                onChange={(event) =>
-                  setDraft({ ...draft, [athlete.id]: event.currentTarget.checked })
-                }
-              />
-            ))
-          )}
-
-          <Group justify="space-between" mt="md">
-            <Text size="sm" c="dimmed">
-              Отмечено: {presentCount(draft)} из {editingAthletes.length}
-            </Text>
-            <Group gap="xs">
-              <Button variant="default" onClick={() => setEditing(null)}>
-                Отмена
-              </Button>
-              <Button onClick={saveEditor}>Сохранить</Button>
-            </Group>
-          </Group>
-        </Stack>
-      </Modal>
+        onSave={saveMarks}
+      />
     </>
   )
 }

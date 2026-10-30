@@ -1,9 +1,11 @@
-import { Badge, Group, Progress, Table, Text, TextInput, Title } from '@mantine/core'
-import { IconSearch } from '@tabler/icons-react'
+import { Group, Progress, Table, Text, Title } from '@mantine/core'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import EmptyState from '../components/EmptyState'
-import { ATHLETES, STATUS_COLORS, STATUS_LABELS } from '../data/athletes'
+import AthleteStatusBadge from '../entities/athlete/AthleteStatusBadge'
+import { ATHLETES } from '../entities/athlete/model'
+import AthleteSearch from '../features/search-athletes/AthleteSearch'
+import { filterAthletes } from '../features/search-athletes/model'
+import EmptyState from '../shared/ui/EmptyState'
 
 export default function AthletesPage() {
   const [query, setQuery] = useState('')
@@ -11,22 +13,13 @@ export default function AthletesPage() {
 
   // Отфильтрованный список не держим в отдельном состоянии: он однозначно
   // выводится из запроса, а два источника правды пришлось бы синхронизировать
-  const visible = ATHLETES.filter((a) => a.name.toLowerCase().includes(query.trim().toLowerCase()))
+  const visible = filterAthletes(ATHLETES, query)
 
   return (
     <>
       <Group justify="space-between" mb="md">
         <Title order={2}>Спортсмены</Title>
-        {/* Контролируемое поле: значение живёт в состоянии, поэтому список
-            фильтруется на каждое нажатие клавиши */}
-        <TextInput
-          placeholder="Поиск по имени"
-          leftSection={<IconSearch size={16} />}
-          value={query}
-          onChange={(e) => setQuery(e.currentTarget.value)}
-          // На телефоне поле во всю ширину, на десктопе — фиксированное
-          w={{ base: '100%', sm: 280 }}
-        />
+        <AthleteSearch value={query} onChange={setQuery} />
       </Group>
 
       {visible.length === 0 ? (
@@ -57,9 +50,7 @@ export default function AthletesPage() {
                   <Table.Td>{a.age}</Table.Td>
                   <Table.Td>{a.group}</Table.Td>
                   <Table.Td>
-                    <Badge color={STATUS_COLORS[a.status]} variant="light">
-                      {STATUS_LABELS[a.status]}
-                    </Badge>
+                    <AthleteStatusBadge status={a.status} />
                   </Table.Td>
                   <Table.Td w={180}>
                     {/* Ширина у числа фиксированная, чтобы проценты во всех

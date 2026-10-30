@@ -1,9 +1,10 @@
-import { ActionIcon, Badge, Button, Card, Group, Paper, Stack, Text, Title } from '@mantine/core'
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+import { Button, Card, Group, Paper, Stack, Text, Title } from '@mantine/core'
 import { useState } from 'react'
-import EmptyState from '../components/EmptyState'
-import { KIND_COLORS, KIND_LABELS, getWeekPlan } from '../data/plans'
-import { WEEKDAYS, addDays, formatShort, formatWeekRange, mondayOf } from '../lib/date'
+import SessionKindBadge from '../entities/session/SessionKindBadge'
+import { getWeekPlan } from '../entities/session/model'
+import { WEEKDAYS, addDays, formatShort, formatWeekRange, mondayOf } from '../shared/lib/date'
+import EmptyState from '../shared/ui/EmptyState'
+import PeriodSwitcher from '../shared/ui/PeriodSwitcher'
 
 export default function PlansPage() {
   // Всё состояние экрана — смещение недели относительно текущей.
@@ -18,34 +19,21 @@ export default function PlansPage() {
     <>
       <Group justify="space-between" align="center" mb="md" wrap="wrap">
         <Title order={2}>Планы тренировок</Title>
-        <Group gap="xs">
-          <ActionIcon
-            variant="default"
-            size="lg"
-            onClick={() => setOffset(offset - 1)}
-            aria-label="Предыдущая неделя"
-          >
-            <IconChevronLeft size={18} />
-          </ActionIcon>
-          {/* Фиксированная ширина, иначе стрелки дёргались бы при смене дат */}
-          <Text fw={500} w={130} ta="center">
-            {formatWeekRange(monday)}
-          </Text>
-          <ActionIcon
-            variant="default"
-            size="lg"
-            onClick={() => setOffset(offset + 1)}
-            aria-label="Следующая неделя"
-          >
-            <IconChevronRight size={18} />
-          </ActionIcon>
+        <PeriodSwitcher
+          label={formatWeekRange(monday)}
+          labelWidth={130}
+          prevLabel="Предыдущая неделя"
+          nextLabel="Следующая неделя"
+          onPrev={() => setOffset(offset - 1)}
+          onNext={() => setOffset(offset + 1)}
+        >
           {/* Сравнение явное: offset && ... отрисовало бы на экране цифру 0 */}
           {offset !== 0 && (
             <Button variant="subtle" size="compact-sm" onClick={() => setOffset(0)}>
               Текущая неделя
             </Button>
           )}
-        </Group>
+        </PeriodSwitcher>
       </Group>
 
       <Text c="dimmed" size="sm" mb="md">
@@ -90,9 +78,7 @@ export default function PlansPage() {
                             </Text>
                           </div>
                         </Group>
-                        <Badge color={KIND_COLORS[session.kind]} variant="light">
-                          {KIND_LABELS[session.kind]}
-                        </Badge>
+                        <SessionKindBadge kind={session.kind} />
                       </Group>
                     </Card>
                   ))}

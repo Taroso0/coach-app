@@ -13,15 +13,24 @@ import {
   Title,
 } from '@mantine/core'
 import { IconArrowLeft } from '@tabler/icons-react'
+import { useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import AthleteStatusBadge from '../entities/athlete/AthleteStatusBadge'
-import { INJURY_STATUS_COLORS, INJURY_STATUS_LABELS, findAthlete } from '../entities/athlete/model'
+import { fetchAthlete } from '../entities/athlete/api'
+import { INJURY_STATUS_COLORS, INJURY_STATUS_LABELS } from '../entities/athlete/model'
 import { formatFull } from '../shared/lib/date'
+import { useAsync } from '../shared/lib/useAsync'
 import EmptyState from '../shared/ui/EmptyState'
+import ErrorState from '../shared/ui/ErrorState'
+import FadeIn from '../shared/ui/FadeIn'
+import LoadingState from '../shared/ui/LoadingState'
 
 export default function AthletePage() {
   const { id } = useParams()
-  const athlete = findAthlete(id)
+  const { data: athlete, loading, error, reload } = useAsync(useCallback(() => fetchAthlete(id), [id]))
+
+  if (loading) return <LoadingState />
+  if (error) return <ErrorState text={error} onRetry={reload} />
 
   // Ранний возврат стоит после всех хуков, иначе нарушилось бы правило хуков.
   // После этой проверки TypeScript сужает тип, и ниже athlete уже не undefined
@@ -38,7 +47,7 @@ export default function AthletePage() {
   }
 
   return (
-    <>
+    <FadeIn>
       <Button
         component={Link}
         to="/athletes"
@@ -186,6 +195,6 @@ export default function AthletePage() {
           )}
         </Tabs.Panel>
       </Tabs>
-    </>
+    </FadeIn>
   )
 }
